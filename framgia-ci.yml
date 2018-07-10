@@ -1,10 +1,13 @@
-
 build:
   phpunit:
     image: dangminhtruong/dockerlarav:latest
     commands:
-    - echo '' | phpcs --standard=Framgia app
-    - framgia-ci run --local
+    - cp .env.civ3.example .env
+    - php artisan config:clear
+    - composer install
+    - framgia-ci test-connect mysql_test 3306 60
+    - php artisan migrate --database=mysql_test
+    - framgia-ci run
 services:
   mysql:
     image: mysql:5.7
@@ -13,9 +16,54 @@ services:
       MYSQL_USER: homestead
       MYSQL_PASSWORD: secret
       MYSQL_ROOT_PASSWORD: root
+  mysql_test:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: homestead_test
+      MYSQL_USER: homestead_test
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root
+cache:
+  mount:
+    - .git
+    - vendor
+    - node_modules
 deploy:
   docker:
     username: octocat
     password: password
-    email: xdangminhtruongx@gmail.com
+    email: dangminhtruong@gmail.com
     repo: dangminhtruong/Havana_Laravel
+project_type: php
+test:
+  eslint:
+    ignore: false
+    command: eslint --format=checkstyle
+      --output-file=.framgia-ci-reports/eslint.xml
+      resources/assets/js/ --ext .js
+  phpcpd:
+    ignore: true
+    command: phpcpd --log-pmd=.framgia-ci-reports/phpcpd.xml app
+  phpmd:
+    ignore: true
+    command: phpmd app xml cleancode,codesize,controversial,design,naming,unusedcode --reportfile .framgia-ci-reports/phpmd.xml
+  pdepend:
+    ignore: true
+    command: pdepend --summary-xml=.framgia-ci-reports/pdepend.xml
+      --jdepend-chart=.framgia-ci-reports/pdepend.svg
+      --overview-pyramid=.framgia-ci-reports/pyramid.svg
+      app
+  phpmetrics:
+    ignore: true
+    command: phpmetrics --report-html=.framgia-ci-reports/metrics.html
+      --report-xml=.framgia-ci-reports/metrics.xml
+      app
+  phpcs:
+    ignore: false
+    command: echo '' | phpcs --standard=Framgia --report-checkstyle=.framgia-ci-reports/phpcs.xml --ignore=app/Supports/* app
+  phpunit:
+    ignore: false
+    command:
+      - php -dzend_extension=xdebug.so vendor/bin/phpunit
+        --coverage-clover=.framgia-ci-reports/coverage-clover.xml
+        --coverage-html=.framgia-ci-reports/coverage
