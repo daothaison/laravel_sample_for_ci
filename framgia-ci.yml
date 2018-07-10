@@ -1,12 +1,8 @@
 build:
   phpunit:
-    image: dangminhtruong/dockerlarav:latest
+    image: daothaison/civ3-workspace:latest
     commands:
-    - cp .env.civ3.example .env
-    - php artisan config:clear
     - composer install
-    - framgia-ci test-connect mysql_test 3306 60
-    - php artisan migrate --database=mysql_test
     - framgia-ci run
 services:
   mysql:
