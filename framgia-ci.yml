@@ -3,7 +3,7 @@ build:
     image: daothaison/civ3-workspace:latest
     commands:
     - composer install
-    - sl
+    - sleep 1
     - framgia-ci run
 services:
   mysql:
