@@ -3,7 +3,7 @@ build:
     image: daothaison/civ3-workspace:latest
     commands:
     - composer install
-    - sleep 3
+    - echo done
     - vendor/bin/phpunit 
     - framgia-ci run
 services:
