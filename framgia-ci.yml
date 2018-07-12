@@ -4,7 +4,6 @@ build:
     commands:
     - composer install
     - echo done
-    - vendor/bin/phpunit 
     - framgia-ci run
 services:
   mysql:
